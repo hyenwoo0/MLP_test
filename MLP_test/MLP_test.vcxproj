@@ -123,7 +123,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MLP.cpp" />
     <ClCompile Include="MLP_test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MLP.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
