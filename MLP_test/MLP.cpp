@@ -92,6 +92,10 @@ bool CMLP::Create(int InNode, int* pHiddenNode, int OutNode, int numHiddenLayer)
 
 	InitW();	// 가중치 초기화
 
+	// 바이어스를 위한 출력값 = 1
+	for (layer = 0; layer < m_iNumTotalLayer + 1; layer++)
+		m_NodeOut[layer][0] = 1;
+
 	return false;
 }
 
@@ -109,4 +113,34 @@ void CMLP::InitW()
 
 
 	}
+}
+
+void CMLP::Forward()
+{
+	int layer, snode, enode;
+	double wsum;
+
+	for (layer = 0; layer < m_iNumTotalLayer - 1; layer++)
+	{
+		// 다음 레이어의 각 노드별로 출력값을 계산하기 위해 enode 부터 루프
+		for (enode = 1; enode <= m_NumNodes[layer + 1]; enode++) // 바이어스를 위해 0부터
+		{
+			wsum = 0.0; // 노드별 가중합
+			wsum = m_Weight[layer][0][enode] * 1; // 바이어스 가중치 곱
+			for (snode = 1; snode <= m_NumNodes[layer]; snode++)	 // 
+				wsum += m_Weight[layer][snode][enode] * m_NodeOut[layer][snode];
+			
+			// 활성화 함수
+			m_NodeOut[layer + 1][enode] = ActivationFunc(wsum);
+		}
+	}
+}
+
+double CMLP::ActivationFunc(double weightsum)
+{
+	// step function
+	return (weightsum > 0) ? 1.0 : 0.0;		// 삼항 연산자를 통한 계단 함수
+
+	// sigmoid function
+	//return 1.0 / (1.0 + exp(-weightsum)
 }

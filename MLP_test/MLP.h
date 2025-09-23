@@ -24,4 +24,9 @@ public:		// 신경망 구조 선언을 위한 변수
 	bool Create(int InNode, int* pHiddenNode, int OutNode, int numHiddenLayer);
 private:
 	void InitW();
+	double ActivationFunc(double weightsum);
+public:
+	void Forward();
+
+
 };
