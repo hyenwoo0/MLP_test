@@ -10,7 +10,7 @@ CMLP::CMLP()
 	m_NumNodes = nullptr;
 	m_Weight = nullptr;
 	m_NodeOut = nullptr;
-	m_ErrorGrident = nullptr;
+	m_ErrorGradient = nullptr;
 
 	pInValue = nullptr;
 	pOutValue = nullptr;
@@ -50,11 +50,11 @@ CMLP::~CMLP()
 	}
 
 	//m_ErrorGrident
-	if (m_ErrorGrident != nullptr)
+	if (m_ErrorGradient != nullptr)
 	{
 		for (layer = 0; layer < m_iNumTotalLayer + 1; layer++)
-			free(m_ErrorGrident[layer]);
-		free(m_ErrorGrident);
+			free(m_ErrorGradient[layer]);
+		free(m_ErrorGradient);
 	}
 }
 
@@ -164,19 +164,19 @@ void CMLP::BackPropagationLearning()
 {
 	int layer;
 
-	if (m_ErrorGrident == NULL)
+	if (m_ErrorGradient == NULL)
 	{
 		// m_Errorgrident 각 노드별 출력 메모리 할당 = [layer][node]
-		m_ErrorGrident = (double**)malloc((m_iNumTotalLayer) * sizeof(double*));		// 정답이 필요없음
+		m_ErrorGradient = (double**)malloc((m_iNumTotalLayer) * sizeof(double*));		// 정답이 필요없음
 		for (layer = 0; layer < m_iNumTotalLayer; layer++)
-			m_ErrorGrident[layer] = (double*)malloc((m_NumNodes[layer]) * sizeof(double));	// 바이어스를 추가하기 위해 +1
+			m_ErrorGradient[layer] = (double*)malloc((m_NumNodes[layer]) * sizeof(double));	// 바이어스를 추가하기 위해 +1
 	}
 
 	int snode, enode, node;
 	// 출력층  errror 경사 계산
 	for(node = 1; node <= m_iNumOutNodes; node++)
 	{
-		m_ErrorGrident[m_iNumTotalLayer - 1][node] = 
+		m_ErrorGradient[m_iNumTotalLayer - 1][node] = 
 			(pCorrectOutValue[node] - m_NodeOut[m_iNumTotalLayer-1][node]) * m_NodeOut[m_iNumTotalLayer-1][node]
 			* (1 - m_NodeOut[m_iNumTotalLayer -1][node]);
 	}
@@ -186,12 +186,28 @@ void CMLP::BackPropagationLearning()
 	{
 		for(snode = 1; snode <= m_NumNodes[layer]; snode++) // 각 노드별로
 		{
-			m_ErrorGrident[layer][snode] = 0.0;
+			m_ErrorGradient[layer][snode] = 0.0;
 			for(enode = 1; enode <= m_NumNodes[layer + 1]; enode++) // 다음 레이어의 노드수	
 			{
-				m_ErrorGrident[layer][snode] += m_ErrorGrident[layer + 1][enode] * m_Weight[layer][snode][enode];
+				m_ErrorGradient[layer][snode] += m_ErrorGradient[layer + 1][enode] * m_Weight[layer][snode][enode];
 			}
-			m_ErrorGrident[layer][snode] *= m_NodeOut[layer][snode] * (1 - m_NodeOut[layer][snode]);
+			m_ErrorGradient[layer][snode] *= m_NodeOut[layer][snode] * (1 - m_NodeOut[layer][snode]);
 		}
 	}
+
+	// 가중치 갱신
+	for (layer = m_iNumTotalLayer - 2; layer >= 1; layer--) 
+	{
+		for (enode = 0; enode <= m_NumNodes[layer]; enode++)	 // for  바이오스 [0] 때문에 <=
+		{			
+			m_Weight[layer][0][enode] += LEARNING_RATE * m_ErrorGradient[layer + 1][enode];	// 바이어스에 대한 갱신식
+			for (snode = 1; snode <= m_NumNodes[layer]; snode++)
+			{
+				m_Weight[layer][snode][enode] += (LEARNING_RATE * m_ErrorGradient[layer + 1][enode] * m_NodeOut[layer][snode]);
+			}
+
+		}
+	}
+	
+
 }

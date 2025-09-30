@@ -21,7 +21,7 @@ public:		// 신경망 구조 선언을 위한 변수
 	double*** m_Weight;		// [시작 레이어][시작노드][연결노드]
 	double** m_NodeOut;		// [layer][node]  노드가 0일때는 바이어스
 
-	double** m_ErrorGrident; // 오차 역전파를 위한 그라디언트 저장 [layer][node]
+	double** m_ErrorGradient; // 오차 역전파를 위한 그라디언트 저장 [layer][node]
 
 	double *pInValue, *pOutValue;		// 입력 레이어, 출력 레이어	
 	double* pCorrectOutValue;			// 정답 레이어
