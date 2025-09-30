@@ -2,6 +2,7 @@
 
 class CMLP
 {
+public:
 	CMLP();		// 持失切, 社瑚切 識情
 	~CMLP();
 

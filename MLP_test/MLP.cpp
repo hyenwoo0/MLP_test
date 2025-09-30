@@ -139,8 +139,8 @@ void CMLP::Forward()
 double CMLP::ActivationFunc(double weightsum)
 {
 	// step function
-	return (weightsum > 0) ? 1.0 : 0.0;		// 삼항 연산자를 통한 계단 함수
+	//return (weightsum > 0) ? 1.0 : 0.0;		// 삼항 연산자를 통한 계단 함수
 
 	// sigmoid function
-	//return 1.0 / (1.0 + exp(-weightsum)
+	return 1.0 / (1.0 + exp(-weightsum));
 }
