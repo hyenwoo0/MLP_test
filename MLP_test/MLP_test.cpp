@@ -58,7 +58,7 @@ int main()
 	// 각 노드의 출력값
 	for (layer = 0; layer < MultiLayer.m_iNumTotalLayer; layer++)
 	{
-		for (node = 0; node <= MultiLayer.m_NumNodes[layer]; node++)	 // for  바이오스 [0] 때문에 <=
+		for (node = 1; node <= MultiLayer.m_NumNodes[layer]; node++)	 // for  바이오스 [0] 때문에 <=
 			printf("NodeOut[%d][%d] = %lf\n", layer, node, MultiLayer.m_NodeOut[layer][node]);
 		printf("\n");
 	}
