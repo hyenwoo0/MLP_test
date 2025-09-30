@@ -10,6 +10,7 @@ CMLP::CMLP()
 	m_NumNodes = nullptr;
 	m_Weight = nullptr;
 	m_NodeOut = nullptr;
+	m_ErrorGrident = nullptr;
 
 	pInValue = nullptr;
 	pOutValue = nullptr;
@@ -47,6 +48,14 @@ CMLP::~CMLP()
 		}
 		free(m_Weight);
 	}
+
+	//m_ErrorGrident
+	if (m_ErrorGrident != nullptr)
+	{
+		for (layer = 0; layer < m_iNumTotalLayer + 1; layer++)
+			free(m_ErrorGrident[layer]);
+		free(m_ErrorGrident);
+	}
 }
 
 bool CMLP::Create(int InNode, int* pHiddenNode, int OutNode, int numHiddenLayer)
@@ -76,6 +85,10 @@ bool CMLP::Create(int InNode, int* pHiddenNode, int OutNode, int numHiddenLayer)
 	//정답( 출력노드와 같은 개수, 바이어스 필요없음)
 	m_NodeOut[m_iNumTotalLayer] = (double*)malloc((m_NumNodes[m_iNumTotalLayer] + 1) * sizeof(double));		
 
+
+	
+
+
 	//m_Weight 메모리 할당 = [layer][시작노드][연결노드]
 	m_Weight = (double***)malloc((m_iNumTotalLayer - 1) * sizeof(double**));
 	for (layer = 0; layer < m_iNumTotalLayer - 1; layer++)
@@ -85,6 +98,8 @@ bool CMLP::Create(int InNode, int* pHiddenNode, int OutNode, int numHiddenLayer)
 			m_Weight[layer][snode] = (double*)malloc((m_NumNodes[layer + 1] + 1) * sizeof(double));		// 다음 레이어의 노드수 + 1
 
 	}
+
+
 
 	pInValue = m_NodeOut[0];	// 입력 레이어
 	pOutValue = m_NodeOut[m_iNumTotalLayer - 1];	// 출력 레이어
@@ -143,4 +158,40 @@ double CMLP::ActivationFunc(double weightsum)
 
 	// sigmoid function
 	return 1.0 / (1.0 + exp(-weightsum));
+}
+
+void CMLP::BackPropagationLearning()
+{
+	int layer;
+
+	if (m_ErrorGrident == NULL)
+	{
+		// m_Errorgrident 각 노드별 출력 메모리 할당 = [layer][node]
+		m_ErrorGrident = (double**)malloc((m_iNumTotalLayer) * sizeof(double*));		// 정답이 필요없음
+		for (layer = 0; layer < m_iNumTotalLayer; layer++)
+			m_ErrorGrident[layer] = (double*)malloc((m_NumNodes[layer]) * sizeof(double));	// 바이어스를 추가하기 위해 +1
+	}
+
+	int snode, enode, node;
+	// 출력층  errror 경사 계산
+	for(node = 1; node <= m_iNumOutNodes; node++)
+	{
+		m_ErrorGrident[m_iNumTotalLayer - 1][node] = 
+			(pCorrectOutValue[node] - m_NodeOut[m_iNumTotalLayer-1][node]) * m_NodeOut[m_iNumTotalLayer-1][node]
+			* (1 - m_NodeOut[m_iNumTotalLayer -1][node]);
+	}
+
+	// 전체 error경사 계산
+	for(layer = m_iNumTotalLayer - 2; layer >= 1; layer--)	// 출력 레이어 바로 앞 레이어부터 시작
+	{
+		for(snode = 1; snode <= m_NumNodes[layer]; snode++) // 각 노드별로
+		{
+			m_ErrorGrident[layer][snode] = 0.0;
+			for(enode = 1; enode <= m_NumNodes[layer + 1]; enode++) // 다음 레이어의 노드수	
+			{
+				m_ErrorGrident[layer][snode] += m_ErrorGrident[layer + 1][enode] * m_Weight[layer][snode][enode];
+			}
+			m_ErrorGrident[layer][snode] *= m_NodeOut[layer][snode] * (1 - m_NodeOut[layer][snode]);
+		}
+	}
 }
