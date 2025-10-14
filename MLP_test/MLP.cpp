@@ -52,8 +52,8 @@ CMLP::~CMLP()
 	//m_ErrorGrident
 	if (m_ErrorGradient != nullptr)
 	{
-		for (layer = 0; layer < m_iNumTotalLayer + 1; layer++)
-			free(m_ErrorGradient[layer]);
+		for (layer = 0; layer < m_iNumTotalLayer; layer++)
+            free(m_ErrorGradient[layer]);
 		free(m_ErrorGradient);
 	}
 }
@@ -83,7 +83,7 @@ bool CMLP::Create(int InNode, int* pHiddenNode, int OutNode, int numHiddenLayer)
 	for(layer = 0; layer < m_iNumTotalLayer; layer++)
 		m_NodeOut[layer] = (double*)malloc((m_NumNodes[layer] + 1) * sizeof(double));	// 바이어스를 추가하기 위해 +1
 	//정답( 출력노드와 같은 개수, 바이어스 필요없음)
-	m_NodeOut[m_iNumTotalLayer] = (double*)malloc((m_NumNodes[m_iNumTotalLayer] + 1) * sizeof(double));		
+	m_NodeOut[m_iNumTotalLayer] = (double*)malloc((m_NumNodes[m_iNumTotalLayer - 1] + 1) * sizeof(double));		
 
 
 	
@@ -169,7 +169,7 @@ void CMLP::BackPropagationLearning()
 		// m_Errorgrident 각 노드별 출력 메모리 할당 = [layer][node]
 		m_ErrorGradient = (double**)malloc((m_iNumTotalLayer) * sizeof(double*));		// 정답이 필요없음
 		for (layer = 0; layer < m_iNumTotalLayer; layer++)
-			m_ErrorGradient[layer] = (double*)malloc((m_NumNodes[layer]) * sizeof(double));	// 바이어스를 추가하기 위해 +1
+			m_ErrorGradient[layer] = (double*)malloc((m_NumNodes[layer] + 1) * sizeof(double));	// 바이어스를 추가하기 위해 +1
 	}
 
 	int snode, enode, node;
@@ -196,7 +196,7 @@ void CMLP::BackPropagationLearning()
 	}
 
 	// 가중치 갱신
-	for (layer = m_iNumTotalLayer - 2; layer >= 1; layer--) 
+	for (layer = m_iNumTotalLayer - 2; layer >= 0; layer--) 
 	{
 		for (enode = 0; enode <= m_NumNodes[layer]; enode++)	 // for  바이오스 [0] 때문에 <=
 		{			
